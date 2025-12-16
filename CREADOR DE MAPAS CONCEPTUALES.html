@@ -1,0 +1,3812 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Conceptual | Múltiples Archivos</title>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #000000;
+        }
+
+        /* HEADER SUPERIOR CON PESTAÑAS */
+        .app-header {
+            background: #111111;
+            padding: 0;
+            border-bottom: 1px solid #333333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tabs-container {
+            display: flex;
+            background: #222222;
+            border-bottom: 1px solid #333333;
+            overflow-x: auto;
+            padding: 0 10px;
+        }
+
+        .tab {
+            display: flex;
+            align-items: center;
+            padding: 8px 15px;
+            background: #222222;
+            border-right: 1px solid #333333;
+            cursor: pointer;
+            min-width: 120px;
+            max-width: 200px;
+            transition: all 0.2s ease;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .tab:hover {
+            background: #2a2a2a;
+        }
+
+        .tab.active {
+            background: #111111;
+            border-bottom: 2px solid #8e44ad;
+        }
+
+        .tab-title {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 13px;
+            color: #cccccc;
+        }
+
+        .tab.active .tab-title {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .tab-close {
+            margin-left: 8px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #999;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-close:hover {
+            background: #ff4444;
+            color: white;
+        }
+
+        .add-tab-btn {
+            padding: 8px 15px;
+            background: #222222;
+            border: none;
+            color: #8e44ad;
+            cursor: pointer;
+            font-size: 16px;
+            min-width: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .add-tab-btn:hover {
+            background: #2a2a2a;
+            color: #9b59b6;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 15px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .app-logo {
+            color: #8e44ad;
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .title-input {
+            background: #222222;
+            border: 1px solid #333333;
+            color: #ffffff;
+            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            width: 300px;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .title-input:focus {
+            outline: 1px solid #8e44ad;
+            background: #1a1a1a;
+        }
+
+        /* CONTENIDO PRINCIPAL */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR IZQUIERDA - SOLO ICONOS */
+        .sidebar {
+            width: 60px;
+            background: #111111;
+            border-right: 1px solid #333333;
+            display: flex;
+            flex-direction: column;
+            padding: 10px 0;
+            gap: 2px;
+        }
+
+        .tool-btn {
+            width: 50px;
+            height: 50px;
+            background: #222222;
+            border: none;
+            border-radius: 6px;
+            color: #cccccc;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 5px;
+            transition: all 0.2s ease;
+        }
+
+        .tool-btn:hover {
+            background: #333333;
+            color: #8e44ad;
+            transform: translateY(-1px);
+        }
+
+        .tool-btn.active {
+            background: #8e44ad;
+            color: white;
+        }
+
+        .tool-btn.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .tool-btn i {
+            pointer-events: none;
+        }
+
+        .tool-separator {
+            height: 1px;
+            background: #333333;
+            margin: 5px 10px;
+        }
+
+        .tool-label {
+            font-size: 9px;
+            text-align: center;
+            color: #666;
+            margin-top: -5px;
+            margin-bottom: 5px;
+        }
+
+        /* ÁREA DE TRABAJO - ESTILO COREL DRAW */
+        .workspace-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #2a2a2a;
+            padding: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .workspace-container {
+            flex: 1;
+            background: #2a2a2a;
+            border-radius: 8px;
+            border: 2px solid #333333;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .workspace-wrapper {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            cursor: grab;
+            background: #2a2a2a;
+        }
+
+        .workspace-wrapper:active {
+            cursor: grabbing;
+        }
+
+        /* CONTENEDOR DE EXPORTACIÓN - ESTILO COREL DRAW */
+        .export-container {
+            width: 1123px;
+            height: 794px;
+            background: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 
+                0 0 0 1px rgba(255, 255, 0, 0.5),
+                0 0 20px rgba(0, 0, 0, 0.3),
+                inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+            border-radius: 2px;
+            z-index: 10;
+        }
+
+        .workspace {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-origin: center center;
+            transition: transform 0.2s;
+        }
+
+        /* CONTROLES DE ZOOM */
+        .zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(17, 17, 17, 0.9);
+            border-radius: 8px;
+            padding: 5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            z-index: 100;
+            border: 1px solid #333333;
+            display: flex;
+            gap: 2px;
+        }
+
+        .zoom-btn {
+            width: 36px;
+            height: 36px;
+            background: #222222;
+            border: none;
+            border-radius: 4px;
+            color: #cccccc;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .zoom-btn:hover {
+            background: #333333;
+            color: #8e44ad;
+        }
+
+        .zoom-display {
+            background: #111111;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 12px;
+            margin: 0 5px;
+            min-width: 60px;
+        }
+
+        /* PANEL INFERIOR */
+        .info-panel {
+            background: #111111;
+            padding: 10px 15px;
+            border-top: 1px solid #333333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .mode-indicator {
+            background: #8e44ad;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            display: none;
+        }
+
+        /* INDICADOR DE PESTAÑA ACTIVA */
+        .tab-indicator {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #8e44ad;
+            display: none;
+        }
+
+        .tab.active .tab-indicator {
+            display: block;
+        }
+
+        /* BOTONES DE ACCIÓN EN HEADER */
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .header-btn {
+            background: #222222;
+            border: 1px solid #333333;
+            color: #cccccc;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .header-btn:hover {
+            background: #333333;
+            color: #8e44ad;
+        }
+
+        .file-input-hidden {
+            display: none;
+        }
+
+        /* MODALES */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: #111111;
+            margin: 5% auto;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            position: relative;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 1px solid #333333;
+            color: #ffffff;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #999;
+            background: none;
+            border: none;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .close-modal:hover {
+            background: #222;
+            color: #fff;
+        }
+
+        .modal-title {
+            font-family: 'EB Garamond', serif;
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #cccccc;
+            font-size: 12px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #333333;
+            border-radius: 5px;
+            font-size: 14px;
+            background: #222222;
+            color: #ffffff;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: 1px solid #8e44ad;
+            background: #1a1a1a;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #8e44ad;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #333333;
+            color: #cccccc;
+        }
+
+        .btn-danger {
+            background: #c0392b;
+            color: white;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-info {
+            background: #3498db;
+            color: white;
+        }
+
+        /* MEZCLADOR DE COLOR SIMPLE */
+        .simple-color-mixer {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .color-preview-box {
+            width: 100%;
+            height: 60px;
+            border-radius: 8px;
+            border: 2px solid #333;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .color-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .color-input-group label {
+            min-width: 30px;
+            margin-bottom: 0;
+            font-weight: bold;
+            color: #8e44ad;
+        }
+
+        .color-slider-simple {
+            flex: 1;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, #000, #f00);
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .color-slider-simple#red-slider {
+            background: linear-gradient(to right, #000, #f00);
+        }
+
+        .color-slider-simple#green-slider {
+            background: linear-gradient(to right, #000, #0f0);
+        }
+
+        .color-slider-simple#blue-slider {
+            background: linear-gradient(to right, #000, #00f);
+        }
+
+        .color-slider-simple::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid #8e44ad;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        .color-value-simple {
+            min-width: 40px;
+            text-align: center;
+            font-weight: bold;
+            font-family: monospace;
+            background: #222;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .hex-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .hex-input {
+            flex: 1;
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+
+        /* CONTROL DE TAMAÑO DE FUENTE */
+        .font-size-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .font-size-input {
+            width: 80px;
+            text-align: center;
+        }
+
+        /* CONTROL DE TAMAÑO DE FONDO */
+        .background-size-control {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .size-input {
+            flex: 1;
+            text-align: center;
+        }
+
+        /* NODOS */
+        .node {
+            position: absolute;
+            min-width: 100px;
+            max-width: 150px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            cursor: move;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            border: 2px solid transparent;
+            user-select: none;
+            transition: all 0.2s ease;
+            z-index: 20;
+            color: #000000;
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+        }
+
+        .node:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 30;
+        }
+
+        .node.dragging {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            z-index: 1000;
+            cursor: grabbing;
+        }
+
+        .node.selected {
+            border-color: #8e44ad;
+            box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.3);
+            z-index: 25;
+        }
+
+        .node.with-link {
+            border-left: 4px solid #3498db;
+        }
+
+        .node-title {
+            font-weight: 600;
+            margin-bottom: 3px;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        .node-subtitle {
+            font-weight: 500;
+            margin-bottom: 5px;
+            font-style: italic;
+            line-height: 1.2;
+            opacity: 0.7;
+            word-break: break-word;
+        }
+
+        .node-image {
+            max-width: 100%;
+            max-height: 80px;
+            margin: 5px auto;
+            display: block;
+            border-radius: 4px;
+            object-fit: contain;
+        }
+
+        /* CONEXIONES */
+        .connection {
+            position: absolute;
+            background: #666;
+            height: 3px;
+            transform-origin: 0 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .connection.selected {
+            background: #e74c3c;
+            height: 4px;
+            z-index: 15;
+        }
+
+        .connection-arrow {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 10px solid #666;
+            transform-origin: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .connection-arrow.selected {
+            border-top-color: #e74c3c;
+            z-index: 15;
+        }
+
+        /* MODAL DE GESTIÓN DE PESTAÑAS */
+        .tabs-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 15px 0;
+            border: 1px solid #333;
+            border-radius: 5px;
+        }
+
+        .tab-list-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            transition: background 0.2s;
+        }
+
+        .tab-list-item:hover {
+            background: #222;
+        }
+
+        .tab-list-item.active {
+            background: #333;
+            border-left: 3px solid #8e44ad;
+        }
+
+        .tab-list-title {
+            flex: 1;
+            margin-left: 10px;
+        }
+
+        .tab-list-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .tab-list-btn {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 50px;
+            }
+            
+            .tool-btn {
+                width: 40px;
+                height: 40px;
+                margin: 0 5px;
+                font-size: 16px;
+            }
+            
+            .title-input {
+                width: 200px;
+                font-size: 12px;
+            }
+            
+            .export-container {
+                width: 95%;
+                height: auto;
+                min-height: 500px;
+                aspect-ratio: 1.414 / 1;
+            }
+            
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+                padding: 20px;
+            }
+            
+            .workspace-wrapper {
+                cursor: default;
+            }
+            
+            .tab {
+                min-width: 100px;
+                padding: 6px 10px;
+            }
+            
+            .tab-title {
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 60px;
+                flex-direction: row;
+                justify-content: space-around;
+                padding: 5px 0;
+                z-index: 100;
+            }
+            
+            .tool-btn {
+                width: 45px;
+                height: 45px;
+                margin: 0;
+            }
+            
+            .main-content {
+                padding-bottom: 70px;
+            }
+            
+            .workspace-area {
+                padding: 10px;
+            }
+            
+            .info-panel {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            .stats {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .zoom-controls {
+                bottom: 10px;
+                right: 10px;
+                padding: 3px;
+            }
+            
+            .zoom-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+            }
+            
+            .zoom-display {
+                font-size: 10px;
+                min-width: 50px;
+                padding: 3px 6px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .tab {
+                min-width: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER SUPERIOR CON PESTAÑAS -->
+        <div class="app-header">
+            <div class="tabs-container" id="tabsContainer">
+                <!-- Las pestañas se generan dinámicamente -->
+            </div>
+            
+            <div class="header-content">
+                <div class="logo-area">
+                    <div class="app-logo">
+                        <i class="fas fa-project-diagram"></i>
+                        <span>MAP v8</span>
+                    </div>
+                    <input type="text" class="title-input" id="mapTitle" placeholder="Nombre del mapa" onchange="updateCurrentMapTitle(this.value)">
+                </div>
+                
+                <div class="header-actions">
+                    <button class="header-btn" onclick="showSaveModal()">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                    <button class="header-btn" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-folder-open"></i> Abrir
+                    </button>
+                    <button class="header-btn" onclick="openInNewTab()">
+                        <i class="fas fa-external-link-alt"></i> Exportar
+                    </button>
+                    <button class="header-btn btn-danger" onclick="clearCurrentMap()">
+                        <i class="fas fa-trash"></i> Limpiar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- INPUT OCULTO PARA ARCHIVOS -->
+        <input type="file" id="fileInput" class="file-input-hidden" accept=".html" onchange="loadFileIntoTab(this.files[0])">
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <div class="main-content">
+            <!-- SIDEBAR IZQUIERDA - SOLO ICONOS -->
+            <div class="sidebar">
+                <div class="tool-label">NODOS</div>
+                <button class="tool-btn" onclick="showNodeModal()" title="Nuevo nodo">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="tool-btn" onclick="editSelectedNode()" title="Editar nodo">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="tool-btn" onclick="copySelectedNode()" title="Copiar nodo">
+                    <i class="fas fa-copy"></i>
+                </button>
+                <button class="tool-btn" onclick="pasteNode()" title="Pegar nodo">
+                    <i class="fas fa-paste"></i>
+                </button>
+                <button class="tool-btn" onclick="deleteSelectedNode()" title="Borrar nodo">
+                    <i class="fas fa-trash"></i>
+                </button>
+                
+                <div class="tool-separator"></div>
+                
+                <div class="tool-label">CONEXIONES</div>
+                <button class="tool-btn" onclick="startConnection()" title="Conectar nodos">
+                    <i class="fas fa-link"></i>
+                </button>
+                <button class="tool-btn" onclick="startDisconnect()" title="Eliminar conexiones">
+                    <i class="fas fa-unlink"></i>
+                </button>
+                
+                <div class="tool-separator"></div>
+                
+                <div class="tool-label">VISIÓN</div>
+                <button class="tool-btn" onclick="deselectAll()" title="Deseleccionar todo">
+                    <i class="fas fa-times-circle"></i>
+                </button>
+                <button class="tool-btn" onclick="showBackgroundModal()" title="Fondo del mapa">
+                    <i class="fas fa-image"></i>
+                </button>
+                <button class="tool-btn" onclick="undoAction()" title="Deshacer">
+                    <i class="fas fa-undo"></i>
+                </button>
+            </div>
+
+            <!-- ÁREA DE TRABAJO - ESTILO COREL DRAW -->
+            <div class="workspace-area">
+                <!-- CONTENEDOR DEL WORKSPACE -->
+                <div class="workspace-container">
+                    <div class="workspace-wrapper" id="workspaceWrapper">
+                        <!-- CONTENEDOR DE EXPORTACIÓN (BLANCO) -->
+                        <div class="export-container" id="exportContainer">
+                            <div class="workspace" id="workspace">
+                                <!-- Nodos y conexiones se crean aquí -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- CONTROLES DE ZOOM -->
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" onclick="zoomOut()" title="Alejar">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <div class="zoom-display" id="zoomDisplay">100%</div>
+                        <button class="zoom-btn" onclick="zoomIn()" title="Acercar">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                        <button class="zoom-btn" onclick="resetZoom()" title="Restablecer zoom">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL INFERIOR -->
+        <div class="info-panel">
+            <div class="stats">
+                <div class="stat-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Archivo: <span id="currentTabName">Sin título</span></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-circle"></i>
+                    <span>Nodos: <span id="nodesCount">0</span></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-link"></i>
+                    <span>Conexiones: <span id="connectionsCount">0</span></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-history"></i>
+                    <span>Deshacer: <span id="undoCount">0</span></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-mouse-pointer"></i>
+                    <span id="selectionInfo">Sin selección</span>
+                </div>
+            </div>
+            
+            <div id="modeIndicator" class="mode-indicator" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- MODALES -->
+    
+    <!-- Modal para crear/editar nodo -->
+    <div id="nodeModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeNodeModal()">&times;</button>
+            <h3 class="modal-title" id="nodeModalTitle">NUEVO NODO</h3>
+            
+            <div class="form-group">
+                <label for="nodeTitle">TÍTULO:</label>
+                <input type="text" id="nodeTitle" name="nodeTitle" placeholder="Título del nodo" autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label for="nodeSubtitle">SUBTÍTULO:</label>
+                <input type="text" id="nodeSubtitle" name="nodeSubtitle" placeholder="Subtítulo (opcional)" autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label for="nodeDescription">DESCRIPCIÓN:</label>
+                <textarea id="nodeDescription" name="nodeDescription" placeholder="Descripción detallada..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="nodeHyperlink">HIPERVÍNCULO:</label>
+                <input type="text" id="nodeHyperlink" name="nodeHyperlink" placeholder="https://ejemplo.com o archivo.html" autocomplete="off">
+                <small style="color: #999; font-size: 11px;">Enlace a página web o archivo HTML. En exportación HTML, los nodos serán clickeables.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="nodeFontSize">TAMAÑO DE TEXTO (px):</label>
+                <div class="font-size-control">
+                    <input type="range" id="fontSizeSlider" min="8" max="24" value="14" class="color-slider" oninput="updateFontSizeValue(this.value)">
+                    <input type="number" id="nodeFontSize" min="8" max="24" value="14" class="font-size-input" oninput="updateFontSizeSlider(this.value)">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="nodeTextColor">COLOR DEL TEXTO:</label>
+                <select id="nodeTextColor">
+                    <option value="black">Negro</option>
+                    <option value="white">Blanco</option>
+                    <option value="#333333">Gris oscuro</option>
+                    <option value="#666666">Gris medio</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>COLOR DE FONDO DEL NODO:</label>
+                
+                <!-- MEZCLADOR SIMPLE RGB -->
+                <div class="simple-color-mixer">
+                    <div class="color-preview-box" id="colorPreview"></div>
+                    
+                    <div class="color-input-group">
+                        <label style="color:#ff4444;">R</label>
+                        <input type="range" id="red-slider" class="color-slider-simple" min="0" max="255" value="255" oninput="updateSimpleColor()">
+                        <span id="red-value" class="color-value-simple">255</span>
+                    </div>
+                    
+                    <div class="color-input-group">
+                        <label style="color:#44ff44;">G</label>
+                        <input type="range" id="green-slider" class="color-slider-simple" min="0" max="255" value="255" oninput="updateSimpleColor()">
+                        <span id="green-value" class="color-value-simple">255</span>
+                    </div>
+                    
+                    <div class="color-input-group">
+                        <label style="color:#4444ff;">B</label>
+                        <input type="range" id="blue-slider" class="color-slider-simple" min="0" max="255" value="255" oninput="updateSimpleColor()">
+                        <span id="blue-value" class="color-value-simple">255</span>
+                    </div>
+                    
+                    <div class="hex-input-group">
+                        <label style="color:#8e44ad;">#</label>
+                        <input type="text" id="hex-color-input" class="hex-input" value="#FFFFFF" maxlength="7" oninput="updateColorFromHex(this.value)">
+                        <button class="modal-btn btn-secondary" onclick="applyCustomColor()" style="padding: 5px 10px; font-size: 12px;">
+                            Aplicar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="nodeImage">IMAGEN:</label>
+                <input type="file" id="nodeImage" accept="image/*" onchange="previewNodeImage(event)">
+                <div id="imagePreview" style="margin-top: 10px;"></div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="modal-btn btn-primary" onclick="saveNode()">GUARDAR</button>
+                <button class="modal-btn btn-secondary" onclick="closeNodeModal()">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para descripción del nodo -->
+    <div id="descriptionModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <h3 class="modal-title" id="modalTitle"></h3>
+            <p class="modal-subtitle" id="modalSubtitle"></p>
+            <div class="modal-description" id="modalDescription"></div>
+            <div id="modalHyperlink" style="margin: 15px 0;"></div>
+            <div class="modal-actions">
+                <button class="modal-btn btn-primary" onclick="editSelectedNode()">EDITAR</button>
+                <button class="modal-btn btn-secondary" onclick="closeModal()">CERRAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para guardar -->
+    <div id="saveModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeSaveModal()">&times;</button>
+            <h3 class="modal-title">GUARDAR MAPA</h3>
+            <p>Selecciona el formato de exportación:</p>
+            
+            <div class="modal-actions">
+                <button class="modal-btn btn-primary" onclick="downloadHTML()">
+                    <i class="fas fa-code"></i> HTML (Responsivo)
+                </button>
+                <!-- BOTÓN AÑADIDO PARA EXPORTAR A PNG -->
+                <button class="modal-btn btn-success" onclick="exportToPNG()">
+                    <i class="fas fa-image"></i> PNG (Imagen)
+                </button>
+                <button class="modal-btn btn-info" onclick="saveAllMaps()">
+                    <i class="fas fa-save"></i> Guardar Todos
+                </button>
+                <button class="modal-btn btn-secondary" onclick="openInNewTab()">
+                    <i class="fas fa-external-link-alt"></i> Nueva Pestaña
+                </button>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="modal-btn btn-secondary" onclick="closeSaveModal()" style="flex: 1;">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para fondo -->
+    <div id="backgroundModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeBackgroundModal()">&times;</button>
+            <h3 class="modal-title">FONDO DEL MAPA</h3>
+            
+            <div class="form-group">
+                <label>COLOR DE FONDO:</label>
+                
+                <!-- MEZCLADOR SIMPLE PARA FONDO -->
+                <div class="simple-color-mixer">
+                    <div class="color-preview-box" id="bgColorPreview"></div>
+                    
+                    <div class="color-input-group">
+                        <label style="color:#ff4444;">R</label>
+                        <input type="range" id="bg-red-slider" class="color-slider-simple" min="0" max="255" value="255" oninput="updateBgSimpleColor()">
+                        <span id="bg-red-value" class="color-value-simple">255</span>
+                    </div>
+                    
+                    <div class="color-input-group">
+                        <label style="color:#44ff44;">G</label>
+                        <input type="range" id="bg-green-slider" class="color-slider-simple" min="0" max="255" value="255" oninput="updateBgSimpleColor()">
+                        <span id="bg-green-value" class="color-value-simple">255</span>
+                    </div>
+                    
+                    <div class="color-input-group">
+                        <label style="color:#4444ff;">B</label>
+                        <input type="range" id="bg-blue-slider" class="color-slider-simple" min="0" max="255" value="255" oninput="updateBgSimpleColor()">
+                        <span id="bg-blue-value" class="color-value-simple">255</span>
+                    </div>
+                    
+                    <div class="hex-input-group">
+                        <label style="color:#8e44ad;">#</label>
+                        <input type="text" id="bg-hex-color-input" class="hex-input" value="#FFFFFF" maxlength="7" oninput="updateBgColorFromHex(this.value)">
+                        <button class="modal-btn btn-secondary" onclick="applyBgCustomColor()" style="padding: 5px 10px; font-size: 12px;">
+                            Aplicar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>TAMAÑO DEL FONDO:</label>
+                <div class="background-size-control">
+                    <input type="number" id="bgWidth" class="size-input" placeholder="Ancho" value="1123">
+                    <span style="align-self: center;">x</span>
+                    <input type="number" id="bgHeight" class="size-input" placeholder="Alto" value="794">
+                    <button class="modal-btn btn-secondary" onclick="applyBackgroundSize()">Aplicar</button>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="modal-btn btn-primary" onclick="applyBackground()">APLICAR TODO</button>
+                <button class="modal-btn btn-secondary" onclick="closeBackgroundModal()">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =============================================
+        // SISTEMA DE MÚLTIPLES ARCHIVOS/PESTAÑAS
+        // =============================================
+        
+        class MapTab {
+            constructor(id, title = "Nuevo Mapa") {
+                this.id = id;
+                this.title = title;
+                this.nodes = [];
+                this.connections = [];
+                this.history = [];
+                this.historyIndex = -1;
+                this.nodeCounter = 0;
+                this.backgroundColor = "#ffffff";
+                this.backgroundWidth = 1123;
+                this.backgroundHeight = 794;
+                this.zoomLevel = 1;
+                this.translateX = 0;
+                this.translateY = 0;
+                this.selectedNodeId = null;
+                this.selectedConnection = null;
+                this.copiedNode = null;
+                this.unsavedChanges = false;
+                this.fileName = null;
+            }
+            
+            saveState() {
+                if (this.historyIndex < this.history.length - 1) {
+                    this.history = this.history.slice(0, this.historyIndex + 1);
+                }
+                
+                this.history.push({
+                    nodes: JSON.parse(JSON.stringify(this.nodes)),
+                    connections: JSON.parse(JSON.stringify(this.connections)),
+                    nodeCounter: this.nodeCounter
+                });
+                
+                this.historyIndex = this.history.length - 1;
+                
+                if (this.history.length > 30) {
+                    this.history.shift();
+                    this.historyIndex--;
+                }
+                
+                this.unsavedChanges = true;
+                this.updateTabUI();
+            }
+            
+            undo() {
+                if (this.historyIndex > 0) {
+                    this.historyIndex--;
+                    const state = this.history[this.historyIndex];
+                    this.nodes = JSON.parse(JSON.stringify(state.nodes));
+                    this.connections = JSON.parse(JSON.stringify(state.connections));
+                    this.nodeCounter = state.nodeCounter;
+                    return true;
+                }
+                return false;
+            }
+            
+            updateTabUI() {
+                const tabElement = document.querySelector(`.tab[data-tab-id="${this.id}"]`);
+                if (tabElement) {
+                    const titleSpan = tabElement.querySelector('.tab-title');
+                    titleSpan.textContent = this.title + (this.unsavedChanges ? ' *' : '');
+                }
+            }
+        }
+
+        // Variables globales
+        let tabs = [];
+        let currentTabId = null;
+        let connectionMode = false;
+        let disconnectMode = false;
+        let sourceNodeId = null;
+        let editingNodeId = null;
+        let currentNodeImage = null;
+        let isPanning = false;
+        let startPanX, startPanY;
+        
+        // VARIABLE GLOBAL PARA NODOS COPIADOS ENTRE PESTAÑAS
+        let globalCopiedNode = null;
+
+        // Elementos DOM
+        const workspace = document.getElementById('workspace');
+        const workspaceWrapper = document.getElementById('workspaceWrapper');
+        const exportContainer = document.getElementById('exportContainer');
+        const modeIndicator = document.getElementById('modeIndicator');
+        const zoomDisplay = document.getElementById('zoomDisplay');
+        const tabsContainer = document.getElementById('tabsContainer');
+        const currentTabName = document.getElementById('currentTabName');
+
+        // =============================================
+        // SISTEMA DE COLORES SIMPLE - MEZCLADOR RGB
+        // =============================================
+
+        // Variables para el color del nodo
+        let selectedNodeColor = "#ffffff";
+        let selectedTextColor = "black";
+        let selectedNodeHyperlink = "";
+
+        // Variables para el color del fondo
+        let selectedBgColor = "#ffffff";
+
+        function initColorSystem() {
+            // Inicializar valores por defecto
+            updateSimpleColor();
+            updateBgSimpleColor();
+        }
+
+        function updateSimpleColor() {
+            const r = document.getElementById('red-slider').value;
+            const g = document.getElementById('green-slider').value;
+            const b = document.getElementById('blue-slider').value;
+            
+            document.getElementById('red-value').textContent = r;
+            document.getElementById('green-value').textContent = g;
+            document.getElementById('blue-value').textContent = b;
+            
+            const color = rgbToHex(parseInt(r), parseInt(g), parseInt(b));
+            selectedNodeColor = color;
+            
+            document.getElementById('colorPreview').style.backgroundColor = color;
+            document.getElementById('hex-color-input').value = color;
+            
+            // Auto-ajustar color de texto según contraste
+            selectedTextColor = getContrastColor(color);
+            document.getElementById('nodeTextColor').value = selectedTextColor;
+        }
+
+        function updateBgSimpleColor() {
+            const r = document.getElementById('bg-red-slider').value;
+            const g = document.getElementById('bg-green-slider').value;
+            const b = document.getElementById('bg-blue-slider').value;
+            
+            document.getElementById('bg-red-value').textContent = r;
+            document.getElementById('bg-green-value').textContent = g;
+            document.getElementById('bg-blue-value').textContent = b;
+            
+            const color = rgbToHex(parseInt(r), parseInt(g), parseInt(b));
+            selectedBgColor = color;
+            
+            document.getElementById('bgColorPreview').style.backgroundColor = color;
+            document.getElementById('bg-hex-color-input').value = color;
+        }
+
+        function updateColorFromHex(hexValue) {
+            if (!hexValue) return;
+            
+            // Asegurar formato correcto
+            if (!hexValue.startsWith('#')) {
+                hexValue = '#' + hexValue;
+            }
+            
+            // Validar formato hexadecimal
+            if (!/^#[0-9A-F]{6}$/i.test(hexValue)) {
+                return;
+            }
+            
+            // Convertir hex a RGB
+            const rgb = hexToRgb(hexValue);
+            if (rgb) {
+                document.getElementById('red-slider').value = rgb.r;
+                document.getElementById('green-slider').value = rgb.g;
+                document.getElementById('blue-slider').value = rgb.b;
+                updateSimpleColor();
+            }
+        }
+
+        function updateBgColorFromHex(hexValue) {
+            if (!hexValue) return;
+            
+            // Asegurar formato correcto
+            if (!hexValue.startsWith('#')) {
+                hexValue = '#' + hexValue;
+            }
+            
+            // Validar formato hexadecimal
+            if (!/^#[0-9A-F]{6}$/i.test(hexValue)) {
+                return;
+            }
+            
+            // Convertir hex a RGB
+            const rgb = hexToRgb(hexValue);
+            if (rgb) {
+                document.getElementById('bg-red-slider').value = rgb.r;
+                document.getElementById('bg-green-slider').value = rgb.g;
+                document.getElementById('bg-blue-slider').value = rgb.b;
+                updateBgSimpleColor();
+            }
+        }
+
+        function applyCustomColor() {
+            updateSimpleColor();
+        }
+
+        function applyBgCustomColor() {
+            updateBgSimpleColor();
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function getContrastColor(hexColor) {
+            // Convertir hex a RGB
+            const rgb = hexToRgb(hexColor);
+            if (!rgb) return "black";
+            
+            // Calcular luminosidad
+            const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
+            
+            // Retornar blanco o negro según contraste
+            return luminance > 0.5 ? 'black' : 'white';
+        }
+
+        // =============================================
+        // GESTIÓN DE PESTAÑAS
+        // =============================================
+
+        function getCurrentTab() {
+            return tabs.find(tab => tab.id === currentTabId);
+        }
+
+        function createNewTab(title = "Nuevo Mapa") {
+            const tabId = 'tab-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            const tab = new MapTab(tabId, title);
+            
+            // Agregar nodos de ejemplo para la primera pestaña
+            if (tabs.length === 0) {
+                tab.nodes = [
+                    {
+                        id: 'node-1',
+                        title: 'Concepto Principal',
+                        subtitle: 'Idea central',
+                        description: 'Este es el nodo principal del mapa conceptual.',
+                        hyperlink: '',
+                        color: '#3498db',
+                        textColor: 'white',
+                        fontSize: 16,
+                        x: 300,
+                        y: 200
+                    },
+                    {
+                        id: 'node-2',
+                        title: 'Subconcepto 1',
+                        subtitle: 'Relacionado directamente',
+                        description: 'Primer subconcepto derivado.',
+                        hyperlink: '',
+                        color: '#2ecc71',
+                        textColor: 'black',
+                        fontSize: 14,
+                        x: 150,
+                        y: 350
+                    },
+                    {
+                        id: 'node-3',
+                        title: 'Subconcepto 2',
+                        subtitle: 'Segunda derivación',
+                        description: 'Segundo subconcepto importante.',
+                        hyperlink: '',
+                        color: '#f39c12',
+                        textColor: 'black',
+                        fontSize: 14,
+                        x: 450,
+                        y: 350
+                    }
+                ];
+                tab.connections = [
+                    { from: 'node-1', to: 'node-2' },
+                    { from: 'node-1', to: 'node-3' }
+                ];
+                tab.nodeCounter = 3;
+                tab.saveState();
+            }
+            
+            tabs.push(tab);
+            createTabElement(tab);
+            switchToTab(tabId);
+            return tab;
+        }
+
+        function createTabElement(tab) {
+            const tabElement = document.createElement('div');
+            tabElement.className = 'tab';
+            tabElement.dataset.tabId = tab.id;
+            
+            tabElement.innerHTML = `
+                <span class="tab-title">${tab.title}${tab.unsavedChanges ? ' *' : ''}</span>
+                <button class="tab-close" onclick="closeTab('${tab.id}', event)">×</button>
+                <div class="tab-indicator"></div>
+            `;
+            
+            tabElement.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('tab-close')) {
+                    switchToTab(tab.id);
+                }
+            });
+            
+            tabsContainer.insertBefore(tabElement, document.querySelector('.add-tab-btn'));
+        }
+
+        function switchToTab(tabId) {
+            // Guardar estado actual antes de cambiar
+            if (currentTabId) {
+                saveCurrentTabState();
+            }
+            
+            // Cambiar a la nueva pestaña
+            currentTabId = tabId;
+            const tab = getCurrentTab();
+            
+            // Actualizar UI de pestañas
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.remove('active');
+            });
+            const activeTab = document.querySelector(`.tab[data-tab-id="${tabId}"]`);
+            if (activeTab) activeTab.classList.add('active');
+            
+            // Actualizar título
+            document.getElementById('mapTitle').value = tab.title;
+            currentTabName.textContent = tab.title;
+            
+            // Restaurar estado visual
+            restoreTabState(tab);
+            
+            showModeIndicator(`Cambiado a: ${tab.title}`, '#3498db');
+        }
+
+        function saveCurrentTabState() {
+            const tab = getCurrentTab();
+            if (!tab) return;
+            
+            // Guardar zoom y pan
+            tab.zoomLevel = zoomLevel;
+            tab.translateX = translateX;
+            tab.translateY = translateY;
+            
+            // Guardar fondo
+            tab.backgroundColor = exportContainer.style.backgroundColor || '#ffffff';
+            tab.backgroundWidth = exportContainer.offsetWidth;
+            tab.backgroundHeight = exportContainer.offsetHeight;
+            
+            // Guardar selección
+            tab.selectedNodeId = selectedNodeId;
+            tab.selectedConnection = selectedConnection;
+            tab.copiedNode = copiedNode;
+        }
+
+        function restoreTabState(tab) {
+            // Restaurar nodos y conexiones
+            renderAll(tab.nodes, tab.connections);
+            
+            // Restaurar fondo
+            exportContainer.style.backgroundColor = tab.backgroundColor;
+            exportContainer.style.width = tab.backgroundWidth + 'px';
+            exportContainer.style.height = tab.backgroundHeight + 'px';
+            
+            // Restaurar zoom y pan
+            zoomLevel = tab.zoomLevel;
+            translateX = tab.translateX;
+            translateY = tab.translateY;
+            updateWorkspaceTransform();
+            
+            // Restaurar selección
+            selectedNodeId = tab.selectedNodeId;
+            selectedConnection = tab.selectedConnection;
+            copiedNode = tab.copiedNode;
+            
+            // Actualizar contadores
+            updateCounters();
+            updateSelectionInfo();
+            
+            // Actualizar zoom display
+            updateZoomDisplay();
+        }
+
+        function closeTab(tabId, event) {
+            if (event) event.stopPropagation();
+            
+            const tab = tabs.find(t => t.id === tabId);
+            if (!tab) return;
+            
+            // Si hay cambios sin guardar, preguntar
+            if (tab.unsavedChanges) {
+                if (!confirm(`¿Cerrar "${tab.title}"? Tiene cambios sin guardar.`)) {
+                    return;
+                }
+            }
+            
+            // Si es la pestaña activa, cambiar a otra
+            if (tabId === currentTabId) {
+                const currentIndex = tabs.findIndex(t => t.id === tabId);
+                let newTabId = null;
+                
+                // Intentar seleccionar pestaña a la derecha
+                if (currentIndex < tabs.length - 1) {
+                    newTabId = tabs[currentIndex + 1].id;
+                }
+                // Si no hay a la derecha, intentar a la izquierda
+                else if (currentIndex > 0) {
+                    newTabId = tabs[currentIndex - 1].id;
+                }
+                
+                // Si hay otra pestaña, cambiar a ella
+                if (newTabId) {
+                    switchToTab(newTabId);
+                }
+            }
+            
+            // Eliminar pestaña
+            tabs = tabs.filter(t => t.id !== tabId);
+            
+            // Eliminar elemento del DOM
+            const tabElement = document.querySelector(`.tab[data-tab-id="${tabId}"]`);
+            if (tabElement) tabElement.remove();
+            
+            // Si no quedan pestañas, crear una nueva
+            if (tabs.length === 0) {
+                createNewTab();
+            }
+        }
+
+        function updateCurrentMapTitle(title) {
+            const tab = getCurrentTab();
+            if (!tab) return;
+            
+            tab.title = title || "Sin título";
+            currentTabName.textContent = tab.title;
+            tab.updateTabUI();
+            tab.unsavedChanges = true;
+        }
+
+        // =============================================
+        // FUNCIONES DE ZOOM Y PAN
+        // =============================================
+
+        let zoomLevel = 1;
+        let translateX = 0, translateY = 0;
+
+        function setupZoomPan() {
+            workspaceWrapper.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                const rect = workspaceWrapper.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                zoom(delta, x, y);
+            });
+
+            workspaceWrapper.addEventListener('mousedown', function(e) {
+                if (e.button === 0) {
+                    isPanning = true;
+                    startPanX = e.clientX - translateX;
+                    startPanY = e.clientY - translateY;
+                    workspaceWrapper.style.cursor = 'grabbing';
+                }
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isPanning) return;
+                e.preventDefault();
+                translateX = e.clientX - startPanX;
+                translateY = e.clientY - startPanY;
+                updateWorkspaceTransform();
+            });
+
+            document.addEventListener('mouseup', function() {
+                isPanning = false;
+                workspaceWrapper.style.cursor = 'grab';
+            });
+
+            workspaceWrapper.addEventListener('mouseleave', function() {
+                isPanning = false;
+                workspaceWrapper.style.cursor = 'grab';
+            });
+        }
+
+        function zoom(factor, x, y) {
+            const oldScale = zoomLevel;
+            zoomLevel = Math.min(Math.max(zoomLevel * factor, 0.3), 3);
+            
+            const scaleChange = zoomLevel / oldScale;
+            translateX = x - (x - translateX) * scaleChange;
+            translateY = y - (y - translateY) * scaleChange;
+            
+            updateWorkspaceTransform();
+        }
+
+        function zoomIn() {
+            zoom(1.2, workspaceWrapper.clientWidth / 2, workspaceWrapper.clientHeight / 2);
+        }
+
+        function zoomOut() {
+            zoom(0.8, workspaceWrapper.clientWidth / 2, workspaceWrapper.clientHeight / 2);
+        }
+
+        function resetZoom() {
+            zoomLevel = 1;
+            translateX = 0;
+            translateY = 0;
+            updateWorkspaceTransform();
+            showModeIndicator('Zoom restablecido', '#3498db');
+        }
+
+        function updateWorkspaceTransform() {
+            workspace.style.transform = `translate(${translateX}px, ${translateY}px) scale(${zoomLevel})`;
+            zoomDisplay.textContent = `${Math.round(zoomLevel * 100)}%`;
+            
+            // Guardar en pestaña actual
+            const tab = getCurrentTab();
+            if (tab) {
+                tab.zoomLevel = zoomLevel;
+                tab.translateX = translateX;
+                tab.translateY = translateY;
+            }
+        }
+
+        function updateZoomDisplay() {
+            const percent = Math.round(zoomLevel * 100);
+            zoomDisplay.textContent = percent + '%';
+        }
+
+        // =============================================
+        // FUNCIONES DE NODOS
+        // =============================================
+
+        function getSelectedNode() {
+            const tab = getCurrentTab();
+            if (!tab) return null;
+            return tab.nodes.find(n => n.id === selectedNodeId);
+        }
+
+        function showNodeModal() {
+            document.getElementById('nodeModal').style.display = 'block';
+            document.getElementById('nodeModalTitle').textContent = 'NUEVO NODO';
+            clearNodeForm();
+            editingNodeId = null;
+            currentNodeImage = null;
+            selectedNodeHyperlink = "";
+            
+            // Resetear color
+            selectedNodeColor = "#ffffff";
+            selectedTextColor = "black";
+            updateSimpleColor();
+            
+            // Resetear hipervínculo
+            document.getElementById('nodeHyperlink').value = "";
+        }
+
+        function closeNodeModal() {
+            document.getElementById('nodeModal').style.display = 'none';
+        }
+
+        function clearNodeForm() {
+            document.getElementById('nodeTitle').value = '';
+            document.getElementById('nodeSubtitle').value = '';
+            document.getElementById('nodeDescription').value = '';
+            document.getElementById('nodeHyperlink').value = '';
+            document.getElementById('nodeFontSize').value = '14';
+            document.getElementById('fontSizeSlider').value = '14';
+            document.getElementById('nodeTextColor').value = 'black';
+            
+            document.getElementById('nodeImage').value = '';
+            document.getElementById('imagePreview').innerHTML = '';
+            currentNodeImage = null;
+        }
+
+        function updateFontSizeValue(value) {
+            document.getElementById('nodeFontSize').value = value;
+        }
+
+        function updateFontSizeSlider(value) {
+            document.getElementById('fontSizeSlider').value = value;
+        }
+
+        function previewNodeImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentNodeImage = e.target.result;
+                document.getElementById('imagePreview').innerHTML = 
+                    `<img src="${currentNodeImage}" style="max-width: 100px; max-height: 100px; border-radius: 4px; margin-top: 5px;">`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function saveNode() {
+            const tab = getCurrentTab();
+            if (!tab) return;
+            
+            const title = document.getElementById('nodeTitle').value.trim();
+            const subtitle = document.getElementById('nodeSubtitle').value.trim();
+            const description = document.getElementById('nodeDescription').value.trim();
+            const hyperlink = document.getElementById('nodeHyperlink').value.trim();
+            const fontSize = parseInt(document.getElementById('nodeFontSize').value);
+            const textColor = document.getElementById('nodeTextColor').value;
+
+            if (!title) {
+                alert('Ingresa un título para el nodo');
+                return;
+            }
+
+            if (fontSize < 8 || fontSize > 24) {
+                alert('El tamaño de texto debe estar entre 8 y 24 px');
+                return;
+            }
+
+            tab.saveState();
+
+            if (editingNodeId) {
+                // Editar nodo existente
+                const nodeIndex = tab.nodes.findIndex(n => n.id === editingNodeId);
+                if (nodeIndex !== -1) {
+                    tab.nodes[nodeIndex].title = title;
+                    tab.nodes[nodeIndex].subtitle = subtitle;
+                    tab.nodes[nodeIndex].description = description;
+                    tab.nodes[nodeIndex].hyperlink = hyperlink;
+                    tab.nodes[nodeIndex].color = selectedNodeColor;
+                    tab.nodes[nodeIndex].textColor = textColor;
+                    tab.nodes[nodeIndex].fontSize = fontSize;
+                    if (currentNodeImage) {
+                        tab.nodes[nodeIndex].image = currentNodeImage;
+                    }
+                    renderAll(tab.nodes, tab.connections);
+                }
+            } else {
+                // Crear nuevo nodo
+                tab.nodeCounter++;
+                const nodeId = 'node-' + tab.nodeCounter;
+                const x = Math.random() * (exportContainer.offsetWidth - 120) + 30;
+                const y = Math.random() * (exportContainer.offsetHeight - 80) + 30;
+
+                const node = {
+                    id: nodeId,
+                    title: title,
+                    subtitle: subtitle,
+                    description: description,
+                    hyperlink: hyperlink,
+                    color: selectedNodeColor,
+                    textColor: textColor,
+                    fontSize: fontSize,
+                    x: x,
+                    y: y
+                };
+
+                if (currentNodeImage) {
+                    node.image = currentNodeImage;
+                }
+
+                tab.nodes.push(node);
+                renderNode(node);
+                updateCounters();
+                
+                // Auto-seleccionar el nuevo nodo
+                setTimeout(() => {
+                    selectedNodeId = nodeId;
+                    const nodeElement = document.getElementById(nodeId);
+                    if (nodeElement) {
+                        nodeElement.classList.add('selected');
+                        updateSelectionInfo();
+                    }
+                }, 100);
+            }
+
+            closeNodeModal();
+        }
+
+        function editSelectedNode() {
+            const node = getSelectedNode();
+            if (!node) {
+                alert('Selecciona un nodo primero');
+                return;
+            }
+
+            const tab = getCurrentTab();
+            editingNodeId = node.id;
+            document.getElementById('nodeModalTitle').textContent = 'EDITAR NODO';
+            document.getElementById('nodeTitle').value = node.title || '';
+            document.getElementById('nodeSubtitle').value = node.subtitle || '';
+            document.getElementById('nodeDescription').value = node.description || '';
+            document.getElementById('nodeHyperlink').value = node.hyperlink || '';
+            document.getElementById('nodeFontSize').value = node.fontSize || 14;
+            document.getElementById('fontSizeSlider').value = node.fontSize || 14;
+            document.getElementById('nodeTextColor').value = node.textColor || 'black';
+            
+            // Configurar color
+            selectedNodeColor = node.color || '#ffffff';
+            selectedTextColor = node.textColor || 'black';
+            
+            // Convertir color a RGB y actualizar controles
+            const rgb = hexToRgb(selectedNodeColor);
+            if (rgb) {
+                document.getElementById('red-slider').value = rgb.r;
+                document.getElementById('green-slider').value = rgb.g;
+                document.getElementById('blue-slider').value = rgb.b;
+                updateSimpleColor();
+            }
+            
+            if (node.image) {
+                currentNodeImage = node.image;
+                document.getElementById('imagePreview').innerHTML = 
+                    `<img src="${node.image}" style="max-width: 100px; max-height: 100px; border-radius: 4px; margin-top: 5px;">`;
+            } else {
+                currentNodeImage = null;
+                document.getElementById('imagePreview').innerHTML = '';
+            }
+            
+            document.getElementById('nodeModal').style.display = 'block';
+            closeModal();
+        }
+
+        function deleteSelectedNode() {
+            const node = getSelectedNode();
+            if (!node) {
+                alert('Selecciona un nodo primero');
+                return;
+            }
+
+            if (!confirm(`¿Eliminar el nodo "${node.title}"?`)) return;
+
+            const tab = getCurrentTab();
+            tab.saveState();
+            
+            // Eliminar conexiones relacionadas
+            tab.connections = tab.connections.filter(conn => 
+                conn.from !== node.id && conn.to !== node.id
+            );
+            
+            // Eliminar nodo
+            tab.nodes = tab.nodes.filter(n => n.id !== node.id);
+            selectedNodeId = null;
+            
+            renderAll(tab.nodes, tab.connections);
+            updateCounters();
+            updateSelectionInfo();
+        }
+
+        // =============================================
+        // FUNCIONES DE COPIA/ PEGADO ENTRE PESTAÑAS
+        // =============================================
+
+        function copySelectedNode() {
+            const node = getSelectedNode();
+            if (!node) {
+                alert('Selecciona un nodo primero');
+                return;
+            }
+            
+            // Copiar a la pestaña actual
+            const tab = getCurrentTab();
+            tab.copiedNode = JSON.parse(JSON.stringify(node));
+            
+            // Copiar a variable global para copiar entre pestañas
+            globalCopiedNode = JSON.parse(JSON.stringify(node));
+            
+            showModeIndicator('Nodo copiado (disponible para todas las pestañas)', '#3498db');
+        }
+
+        function pasteNode() {
+            const tab = getCurrentTab();
+            
+            // Prioridad: nodo copiado en la pestaña actual
+            let nodeToPaste = tab.copiedNode;
+            
+            // Si no hay en la pestaña actual, usar el global
+            if (!nodeToPaste && globalCopiedNode) {
+                nodeToPaste = globalCopiedNode;
+            }
+            
+            if (!nodeToPaste) {
+                alert('No hay nodo copiado. Copia un nodo primero.');
+                return;
+            }
+            
+            tab.saveState();
+            tab.nodeCounter++;
+            const newNodeId = 'node-' + tab.nodeCounter;
+            const offsetX = 40;
+            const offsetY = 40;
+            
+            const newNode = {
+                ...nodeToPaste,
+                id: newNodeId,
+                title: nodeToPaste.title + ' (copia)',
+                x: nodeToPaste.x + offsetX,
+                y: nodeToPaste.y + offsetY
+            };
+            
+            tab.nodes.push(newNode);
+            renderNode(newNode);
+            updateCounters();
+            showModeIndicator('Nodo pegado', '#27ae60');
+            
+            // Auto-seleccionar el nodo pegado
+            setTimeout(() => {
+                selectedNodeId = newNodeId;
+                const nodeElement = document.getElementById(newNodeId);
+                if (nodeElement) {
+                    nodeElement.classList.add('selected');
+                    updateSelectionInfo();
+                }
+            }, 100);
+        }
+
+        // =============================================
+        // FUNCIONES DE CONEXIONES
+        // =============================================
+
+        function startConnection() {
+            const tab = getCurrentTab();
+            if (!tab || tab.nodes.length < 2) {
+                alert('Necesitas al menos 2 nodos');
+                return;
+            }
+            setConnectionMode(true);
+            showModeIndicator('Modo conexión: selecciona primer nodo', '#8e44ad');
+        }
+
+        function setConnectionMode(active) {
+            connectionMode = active;
+            disconnectMode = false;
+            sourceNodeId = null;
+            
+            if (active) {
+                modeIndicator.textContent = '🔗 Modo conexión';
+                modeIndicator.style.display = 'block';
+            } else {
+                modeIndicator.style.display = 'none';
+            }
+        }
+
+        function startDisconnect() {
+            const tab = getCurrentTab();
+            if (!tab || tab.connections.length === 0) {
+                alert('No hay conexiones');
+                return;
+            }
+            setDisconnectMode(true);
+            showModeIndicator('Modo desconexión: haz clic en una conexión', '#e74c3c');
+        }
+
+        function setDisconnectMode(active) {
+            disconnectMode = active;
+            connectionMode = false;
+            
+            if (active) {
+                modeIndicator.textContent = '❌ Modo desconexión';
+                modeIndicator.style.display = 'block';
+                
+                // Hacer conexiones clickeables
+                const tab = getCurrentTab();
+                if (tab) {
+                    tab.connections.forEach(conn => {
+                        const line = document.getElementById('conn-' + conn.from + '-' + conn.to);
+                        const arrow = document.getElementById('arrow-' + conn.from + '-' + conn.to);
+                        if (line) line.style.pointerEvents = 'auto';
+                        if (arrow) arrow.style.pointerEvents = 'auto';
+                    });
+                }
+            } else {
+                modeIndicator.style.display = 'none';
+                
+                // Restaurar conexiones
+                const tab = getCurrentTab();
+                if (tab) {
+                    tab.connections.forEach(conn => {
+                        const line = document.getElementById('conn-' + conn.from + '-' + conn.to);
+                        const arrow = document.getElementById('arrow-' + conn.from + '-' + conn.to);
+                        if (line) line.style.pointerEvents = 'none';
+                        if (arrow) arrow.style.pointerEvents = 'none';
+                    });
+                }
+            }
+        }
+
+        function createConnection(fromId, toId) {
+            const tab = getCurrentTab();
+            if (!tab) return;
+            
+            if (fromId === toId) {
+                alert('No puedes conectar un nodo consigo mismo');
+                return;
+            }
+            
+            const existingConnection = tab.connections.find(conn => 
+                (conn.from === fromId && conn.to === toId) || 
+                (conn.from === toId && conn.to === fromId)
+            );
+            
+            if (existingConnection) {
+                alert('Estos nodos ya están conectados');
+                return;
+            }
+            
+            tab.saveState();
+            tab.connections.push({ from: fromId, to: toId });
+            renderConnection(fromId, toId);
+            updateCounters();
+            showModeIndicator('Conexión creada', '#27ae60');
+        }
+
+        // =============================================
+        // FUNCIONES DE RENDERIZADO
+        // =============================================
+
+        function renderNode(node) {
+            const existingNode = document.getElementById(node.id);
+            if (existingNode) existingNode.remove();
+            
+            const nodeElement = document.createElement('div');
+            nodeElement.className = 'node';
+            nodeElement.id = node.id;
+            nodeElement.style.left = node.x + 'px';
+            nodeElement.style.top = node.y + 'px';
+            nodeElement.style.background = node.color || '#ffffff';
+            nodeElement.style.color = node.textColor || 'black';
+            nodeElement.style.fontSize = (node.fontSize || 14) + 'px';
+            nodeElement.style.zIndex = '20';
+            
+            // Añadir clase si tiene hipervínculo
+            if (node.hyperlink && node.hyperlink.trim() !== '') {
+                nodeElement.classList.add('with-link');
+            }
+            
+            let innerHTML = `
+                <div class="node-title">${node.title}</div>
+                ${node.subtitle ? `<div class="node-subtitle">${node.subtitle}</div>` : ''}
+            `;
+            
+            if (node.image) {
+                innerHTML += `<img src="${node.image}" class="node-image" alt="${node.title}">`;
+            }
+            
+            nodeElement.innerHTML = innerHTML;
+            
+            nodeElement.addEventListener('click', (e) => handleNodeClick(e, node));
+            nodeElement.addEventListener('dblclick', () => showDescriptionModal(node.id));
+            makeDraggable(nodeElement, node);
+            
+            workspace.appendChild(nodeElement);
+            return nodeElement;
+        }
+
+        function handleNodeClick(e, node) {
+            e.stopPropagation();
+            
+            if (disconnectMode) return;
+            
+            // Deseleccionar conexión si hay una seleccionada
+            if (selectedConnection) {
+                const line = document.getElementById('conn-' + selectedConnection.from + '-' + selectedConnection.to);
+                const arrow = document.getElementById('arrow-' + selectedConnection.from + '-' + selectedConnection.to);
+                if (line) line.classList.remove('selected');
+                if (arrow) arrow.classList.remove('selected');
+                selectedConnection = null;
+            }
+            
+            // Deseleccionar nodo anterior
+            if (selectedNodeId && selectedNodeId !== node.id) {
+                const prevNode = document.getElementById(selectedNodeId);
+                if (prevNode) prevNode.classList.remove('selected');
+            }
+            
+            // Seleccionar nuevo nodo
+            selectedNodeId = node.id;
+            const nodeElement = document.getElementById(node.id);
+            nodeElement.classList.add('selected');
+            nodeElement.style.zIndex = '25';
+            
+            // Modo conexión
+            if (connectionMode) {
+                if (!sourceNodeId) {
+                    sourceNodeId = node.id;
+                    showModeIndicator('Ahora selecciona el segundo nodo', '#8e44ad');
+                } else if (sourceNodeId !== node.id) {
+                    createConnection(sourceNodeId, node.id);
+                    setConnectionMode(false);
+                }
+            }
+            
+            updateSelectionInfo();
+        }
+
+        function makeDraggable(element, node) {
+            let isDragging = false;
+            let startX, startY, initialX, initialY;
+            
+            element.addEventListener('mousedown', startDrag);
+            
+            function startDrag(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Solo arrastrar si no estamos en modo conexión o desconexión
+                if (connectionMode || disconnectMode) return;
+                
+                isDragging = true;
+                element.classList.add('dragging');
+                element.style.zIndex = '1000';
+                startX = e.clientX;
+                startY = e.clientY;
+                initialX = element.offsetLeft;
+                initialY = element.offsetTop;
+                
+                document.addEventListener('mousemove', onDrag);
+                document.addEventListener('mouseup', stopDrag);
+            }
+            
+            function onDrag(e) {
+                if (!isDragging) return;
+                updateNodePosition(e.clientX - startX, e.clientY - startY);
+            }
+            
+            function updateNodePosition(dx, dy) {
+                let newX = initialX + dx;
+                let newY = initialY + dy;
+                
+                newX = Math.max(10, Math.min(newX, exportContainer.offsetWidth - element.offsetWidth - 10));
+                newY = Math.max(10, Math.min(newY, exportContainer.offsetHeight - element.offsetHeight - 10));
+                
+                element.style.left = newX + 'px';
+                element.style.top = newY + 'px';
+                node.x = newX;
+                node.y = newY;
+                updateConnections();
+            }
+            
+            function stopDrag() {
+                isDragging = false;
+                element.classList.remove('dragging');
+                element.style.zIndex = '20';
+                if (selectedNodeId === node.id) {
+                    element.style.zIndex = '25';
+                }
+                document.removeEventListener('mousemove', onDrag);
+                document.removeEventListener('mouseup', stopDrag);
+                
+                // Guardar estado
+                const tab = getCurrentTab();
+                if (tab) tab.saveState();
+            }
+        }
+
+        function renderConnection(fromId, toId) {
+            const existingLine = document.getElementById('conn-' + fromId + '-' + toId);
+            const existingArrow = document.getElementById('arrow-' + fromId + '-' + toId);
+            if (existingLine) existingLine.remove();
+            if (existingArrow) existingArrow.remove();
+            
+            const line = document.createElement('div');
+            line.className = 'connection';
+            line.id = 'conn-' + fromId + '-' + toId;
+            line.style.zIndex = '10';
+            
+            const arrow = document.createElement('div');
+            arrow.className = 'connection-arrow';
+            arrow.id = 'arrow-' + fromId + '-' + toId;
+            arrow.style.zIndex = '10';
+            
+            line.addEventListener('click', (e) => handleConnectionClick(e, fromId, toId));
+            arrow.addEventListener('click', (e) => handleConnectionClick(e, fromId, toId));
+            
+            workspace.appendChild(line);
+            workspace.appendChild(arrow);
+            updateConnection(fromId, toId);
+            return { line, arrow };
+        }
+
+        function handleConnectionClick(e, fromId, toId) {
+            e.stopPropagation();
+            
+            if (!disconnectMode) return;
+            
+            const tab = getCurrentTab();
+            if (!tab) return;
+            
+            // Deseleccionar nodo si hay uno seleccionado
+            if (selectedNodeId) {
+                const nodeElement = document.getElementById(selectedNodeId);
+                if (nodeElement) nodeElement.classList.remove('selected');
+                selectedNodeId = null;
+            }
+            
+            // Deseleccionar conexión anterior
+            if (selectedConnection) {
+                const prevLine = document.getElementById('conn-' + selectedConnection.from + '-' + selectedConnection.to);
+                const prevArrow = document.getElementById('arrow-' + selectedConnection.from + '-' + selectedConnection.to);
+                if (prevLine) prevLine.classList.remove('selected');
+                if (prevArrow) prevArrow.classList.remove('selected');
+            }
+            
+            // Seleccionar nueva conexión
+            selectedConnection = { from: fromId, to: toId };
+            const line = document.getElementById('conn-' + fromId + '-' + toId);
+            const arrow = document.getElementById('arrow-' + fromId + '-' + toId);
+            
+            if (line && arrow) {
+                line.classList.add('selected');
+                arrow.classList.add('selected');
+                line.style.zIndex = '15';
+                arrow.style.zIndex = '15';
+                
+                if (confirm('¿Eliminar esta conexión?')) {
+                    tab.saveState();
+                    tab.connections = tab.connections.filter(conn => 
+                        !(conn.from === fromId && conn.to === toId)
+                    );
+                    renderAll(tab.nodes, tab.connections);
+                    updateCounters();
+                    selectedConnection = null;
+                    
+                    if (tab.connections.length === 0) {
+                        setDisconnectMode(false);
+                    }
+                } else {
+                    line.classList.remove('selected');
+                    arrow.classList.remove('selected');
+                    line.style.zIndex = '10';
+                    arrow.style.zIndex = '10';
+                    selectedConnection = null;
+                }
+            }
+            
+            updateSelectionInfo();
+        }
+
+        function updateConnection(fromId, toId) {
+            const tab = getCurrentTab();
+            if (!tab) return;
+            
+            const fromNode = tab.nodes.find(n => n.id === fromId);
+            const toNode = tab.nodes.find(n => n.id === toId);
+            const line = document.getElementById('conn-' + fromId + '-' + toId);
+            const arrow = document.getElementById('arrow-' + fromId + '-' + toId);
+            
+            if (!fromNode || !toNode || !line || !arrow) return;
+            
+            const fromElement = document.getElementById(fromId);
+            const toElement = document.getElementById(toId);
+            if (!fromElement || !toElement) return;
+            
+            const fromX = fromNode.x + fromElement.offsetWidth / 2;
+            const fromY = fromNode.y + fromElement.offsetHeight / 2;
+            const toX = toNode.x + toElement.offsetWidth / 2;
+            const toY = toNode.y + toElement.offsetHeight / 2;
+            
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            line.style.width = length + 'px';
+            line.style.left = fromX + 'px';
+            line.style.top = fromY + 'px';
+            line.style.transform = `rotate(${angle}deg)`;
+            
+            arrow.style.left = toX + 'px';
+            arrow.style.top = toY + 'px';
+            arrow.style.transform = `rotate(${angle}deg)`;
+        }
+
+        function updateConnections() {
+            const tab = getCurrentTab();
+            if (!tab) return;
+            
+            tab.connections.forEach(conn => {
+                updateConnection(conn.from, conn.to);
+            });
+        }
+
+        // =============================================
+        // FUNCIONES DE VISUALIZACIÓN
+        // =============================================
+
+        function showDescriptionModal(nodeId) {
+            const tab = getCurrentTab();
+            if (!tab) return;
+            
+            const node = tab.nodes.find(n => n.id === nodeId);
+            if (!node) return;
+            
+            document.getElementById('modalTitle').textContent = node.title;
+            document.getElementById('modalSubtitle').textContent = node.subtitle || '';
+            document.getElementById('modalDescription').textContent = node.description || 'Sin descripción';
+            
+            // Mostrar hipervínculo si existe
+            const hyperlinkContainer = document.getElementById('modalHyperlink');
+            if (node.hyperlink && node.hyperlink.trim() !== '') {
+                hyperlinkContainer.innerHTML = `
+                    <div style="margin: 15px 0; padding: 10px; background: #222; border-radius: 5px; border-left: 3px solid #3498db;">
+                        <div style="font-size: 12px; color: #8e44ad; margin-bottom: 5px;">
+                            <i class="fas fa-link"></i> HIPERVÍNCULO:
+                        </div>
+                        <div style="font-size: 13px; color: #ddd; word-break: break-all;">
+                            ${node.hyperlink}
+                        </div>
+                        <button onclick="window.open('${node.hyperlink}', '_blank')" 
+                                style="margin-top: 8px; padding: 5px 10px; background: #3498db; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 11px;">
+                            <i class="fas fa-external-link-alt"></i> Abrir enlace
+                        </button>
+                    </div>
+                `;
+            } else {
+                hyperlinkContainer.innerHTML = '';
+            }
+            
+            document.getElementById('descriptionModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('descriptionModal').style.display = 'none';
+        }
+
+        // =============================================
+        // FUNCIONES DE HISTORIAL
+        // =============================================
+
+        function undoAction() {
+            const tab = getCurrentTab();
+            if (!tab) return;
+            
+            if (tab.undo()) {
+                renderAll(tab.nodes, tab.connections);
+                updateCounters();
+                updateUndoCount();
+                deselectAll();
+                showModeIndicator('Acción deshecha', '#f39c12');
+            } else {
+                alert('No hay acciones para deshacer');
+            }
+        }
+
+        function updateUndoCount() {
+            const tab = getCurrentTab();
+            if (!tab) {
+                document.getElementById('undoCount').textContent = '0';
+                return;
+            }
+            document.getElementById('undoCount').textContent = tab.historyIndex;
+        }
+
+        // =============================================
+        // FUNCIONES DE FONDO
+        // =============================================
+
+        function showBackgroundModal() {
+            const tab = getCurrentTab();
+            if (!tab) return;
+            
+            // Configurar color actual
+            selectedBgColor = tab.backgroundColor || '#ffffff';
+            const rgb = hexToRgb(selectedBgColor);
+            if (rgb) {
+                document.getElementById('bg-red-slider').value = rgb.r;
+                document.getElementById('bg-green-slider').value = rgb.g;
+                document.getElementById('bg-blue-slider').value = rgb.b;
+                updateBgSimpleColor();
+            }
+            
+            document.getElementById('backgroundModal').style.display = 'block';
+        }
+
+        function closeBackgroundModal() {
+            document.getElementById('backgroundModal').style.display = 'none';
+        }
+
+        function applyBackgroundSize() {
+            const tab = getCurrentTab();
+            if (!tab) return;
+            
+            const width = parseInt(document.getElementById('bgWidth').value);
+            const height = parseInt(document.getElementById('bgHeight').value);
+            
+            if (width < 100 || width > 2000 || height < 100 || height > 2000) {
+                alert('Las dimensiones deben estar entre 100 y 2000 px');
+                return;
+            }
+            
+            exportContainer.style.width = width + 'px';
+            exportContainer.style.height = height + 'px';
+            tab.backgroundWidth = width;
+            tab.backgroundHeight = height;
+            tab.unsavedChanges = true;
+            tab.updateTabUI();
+            showModeIndicator(`Fondo ajustado a ${width}x${height}px`, '#3498db');
+        }
+
+        function applyBackground() {
+            const tab = getCurrentTab();
+            if (!tab) return;
+            
+            tab.saveState();
+            exportContainer.style.backgroundColor = selectedBgColor;
+            tab.backgroundColor = selectedBgColor;
+            closeBackgroundModal();
+            showModeIndicator('Fondo actualizado', '#27ae60');
+        }
+
+        // =============================================
+        // FUNCIÓN PARA EXPORTAR A PNG
+        // =============================================
+
+        function exportToPNG() {
+            const tab = getCurrentTab();
+            if (!tab) return;
+            
+            // Mostrar mensaje de procesamiento
+            showModeIndicator('Generando imagen PNG...', '#3498db');
+            
+            // Tomar captura del área de exportación
+            html2canvas(exportContainer, {
+                backgroundColor: tab.backgroundColor || '#ffffff',
+                scale: 2, // Alta resolución
+                useCORS: true,
+                logging: false
+            }).then(canvas => {
+                // Convertir a blob
+                canvas.toBlob(function(blob) {
+                    // Crear enlace de descarga
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${tab.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'mapa'}-conceptual.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    // Cerrar modal
+                    closeSaveModal();
+                    
+                    // Marcar como guardado
+                    tab.unsavedChanges = false;
+                    tab.updateTabUI();
+                    
+                    showModeIndicator('Mapa exportado como PNG', '#27ae60');
+                }, 'image/png', 1.0);
+            }).catch(error => {
+                console.error('Error al generar PNG:', error);
+                alert('Error al generar la imagen PNG. Inténtalo de nuevo.');
+                showModeIndicator('Error al generar PNG', '#e74c3c');
+            });
+        }
+
+        // =============================================
+        // FUNCIONES DE EXPORTACIÓN HTML
+        // =============================================
+
+        function generateExportCode(tab) {
+            if (!tab) tab = getCurrentTab();
+            if (!tab) return '';
+            
+            const mapTitle = tab.title;
+            const bgColor = tab.backgroundColor || '#ffffff';
+            const width = tab.backgroundWidth;
+            const height = tab.backgroundHeight;
+            
+            // Escapar HTML para seguridad
+            function escapeHTML(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
+            return `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>${escapeHTML(mapTitle)} - Mapa Conceptual</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: 'Roboto', sans-serif; 
+            background: #f5f5f5;
+            min-height: 100vh; 
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+        
+        .header { 
+            text-align: center; 
+            padding: 20px 15px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 { 
+            color: #8e44ad; 
+            font-size: 28px;
+            margin-bottom: 10px; 
+            word-break: break-word;
+        }
+        
+        .header-info {
+            color: #666;
+            font-size: 14px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        /* CONTENEDOR PRINCIPAL CON FONDO GRIS */
+        .main-container {
+            flex: 1;
+            background: #f5f5f5;
+            border-radius: 10px;
+            overflow: auto;
+            position: relative;
+            min-height: 500px;
+            border: 1px solid #ddd;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* ÁREA DE EXPORTACIÓN (BLANCA) - TAMAÑO FIJO */
+        .export-area {
+            width: ${width}px;
+            height: ${height}px;
+            background: ${bgColor};
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 2px;
+            overflow: visible;
+            margin: 0 auto;
+        }
+        
+        /* NODOS CON POSICIONES ABSOLUTAS Y TAMAÑOS FIJOS */
+        .node { 
+            position: absolute; 
+            min-width: 100px; 
+            max-width: 150px; 
+            padding: 10px; 
+            background: white; 
+            border-radius: 8px; 
+            text-align: center; 
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2); 
+            color: #000000; 
+            font-family: 'Roboto', sans-serif;
+            border: 2px solid transparent;
+            cursor: pointer;
+            z-index: 20;
+            overflow: hidden;
+            transform-origin: center;
+            transition: all 0.2s ease;
+        }
+        
+        .node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 30;
+        }
+        
+        .node.with-link {
+            border-left: 4px solid #3498db;
+            cursor: pointer;
+        }
+        
+        .node.with-link:hover {
+            border-left-color: #2980b9;
+        }
+        
+        /* TAMAÑOS DE FUENTE FIJOS - NO SE ESCALAN */
+        .node-title { 
+            font-weight: 600; 
+            margin-bottom: 3px; 
+            line-height: 1.2; 
+            word-break: break-word; 
+        }
+        
+        .node-subtitle { 
+            font-weight: 500; 
+            margin-bottom: 5px; 
+            font-style: italic; 
+            line-height: 1.2; 
+            opacity: 0.7; 
+            word-break: break-word; 
+        }
+        
+        .node-image {
+            max-width: 100%;
+            max-height: 80px;
+            margin: 5px auto;
+            display: block;
+            border-radius: 4px;
+            object-fit: contain;
+        }
+        
+        /* CONEXIONES CON TAMAÑOS FIJOS */
+        .connection { 
+            position: absolute; 
+            background: #666; 
+            height: 3px; 
+            transform-origin: 0 0; 
+            pointer-events: none; 
+            z-index: 10; 
+        }
+        
+        .connection-arrow { 
+            position: absolute; 
+            width: 0; 
+            height: 0; 
+            border-left: 8px solid transparent; 
+            border-right: 8px solid transparent; 
+            border-top: 10px solid #666; 
+            transform-origin: center; 
+            pointer-events: none; 
+            z-index: 10; 
+        }
+        
+        /* Modal para información del nodo */
+        .node-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .node-modal-content {
+            background: #111;
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid #333;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .node-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #222;
+            border: none;
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            z-index: 1001;
+        }
+        
+        .node-modal-close:hover {
+            background: #333;
+        }
+        
+        .node-modal-title {
+            color: #8e44ad;
+            font-size: 22px;
+            margin-bottom: 10px;
+            padding-right: 40px;
+        }
+        
+        .node-modal-subtitle {
+            color: #aaa;
+            font-style: italic;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .node-modal-description {
+            color: #ddd;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            white-space: pre-line;
+        }
+        
+        .node-modal-image {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: block;
+        }
+        
+        .node-modal-hyperlink {
+            margin: 15px 0;
+            padding: 10px;
+            background: #222;
+            border-radius: 5px;
+            border-left: 3px solid #3498db;
+        }
+        
+        .node-modal-hyperlink a {
+            color: #3498db;
+            text-decoration: none;
+            word-break: break-all;
+        }
+        
+        .node-modal-hyperlink a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Controles de zoom para desktop */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .view-toggle {
+            display: flex;
+            background: #222;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+        
+        .view-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .view-btn.active {
+            background: #8e44ad;
+            color: white;
+        }
+        
+        .zoom-controls {
+            display: flex;
+            background: #222;
+            border-radius: 8px;
+            padding: 5px;
+            gap: 5px;
+            border: 1px solid #333;
+        }
+        
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            background: #111;
+            border: none;
+            border-radius: 5px;
+            color: #ccc;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            user-select: none;
+        }
+        
+        .zoom-btn:hover {
+            background: #333;
+            color: #8e44ad;
+        }
+        
+        .zoom-display {
+            background: #111;
+            color: white;
+            padding: 0 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            min-width: 70px;
+            justify-content: center;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 15px;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #ddd;
+            background: white;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+        
+        /* VISTA MÓVIL - LISTA DE NODOS */
+        .mobile-view {
+            display: none;
+            flex: 1;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .mobile-nodes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .mobile-node {
+            background: #f8f8f8;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #8e44ad;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .mobile-node:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+        
+        .mobile-node.with-link {
+            border-left-color: #3498db;
+        }
+        
+        .mobile-node-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .mobile-node-subtitle {
+            font-size: 14px;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+        
+        .mobile-node-hyperlink {
+            font-size: 12px;
+            color: #3498db;
+            margin-top: 5px;
+        }
+        
+        .mobile-node-connections {
+            font-size: 12px;
+            color: #8e44ad;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .main-container {
+                display: none;
+            }
+            
+            .mobile-view {
+                display: block;
+            }
+            
+            .header {
+                padding: 15px 10px;
+                margin-bottom: 10px;
+            }
+            
+            h1 {
+                font-size: 22px;
+            }
+            
+            .footer {
+                padding: 10px;
+                margin-top: 10px;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .mobile-view {
+                display: none;
+            }
+        }
+        
+        /* Ajuste para pantallas pequeñas en desktop */
+        @media (max-width: 1200px) {
+            .main-container {
+                padding: 10px;
+            }
+            
+            .export-area {
+                transform: scale(0.9);
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .export-area {
+                transform: scale(0.8);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .export-area {
+                transform: scale(0.7);
+            }
+        }
+        
+        /* Botón de ayuda */
+        .help-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #8e44ad;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .help-btn:hover {
+            background: #9b59b6;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>${escapeHTML(mapTitle)}</h1>
+        <div class="header-info">
+            <span><i class="fas fa-circle"></i> ${tab.nodes.length} Nodos</span>
+            <span><i class="fas fa-link"></i> ${tab.connections.length} Conexiones</span>
+            <span><i class="fas fa-calendar"></i> ${new Date().toLocaleDateString()}</span>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Vista Desktop - Mapa completo -->
+        <div class="main-container" id="desktopView">
+            <div class="export-area" id="exportArea">
+                <!-- Los nodos se insertan aquí con JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Vista Móvil - Lista de nodos -->
+        <div class="mobile-view" id="mobileView">
+            <div class="mobile-nodes-list" id="mobileNodesList">
+                <!-- Los nodos se generan dinámicamente -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para información del nodo -->
+    <div class="node-modal" id="nodeModal">
+        <div class="node-modal-content">
+            <button class="node-modal-close" onclick="closeNodeModal()">&times;</button>
+            <h2 class="node-modal-title" id="nodeModalTitle"></h2>
+            <div class="node-modal-subtitle" id="nodeModalSubtitle"></div>
+            <div class="node-modal-description" id="nodeModalDescription"></div>
+            <div class="node-modal-hyperlink" id="nodeModalHyperlink"></div>
+            <img class="node-modal-image" id="nodeModalImage" src="" alt="" style="display: none;">
+            <div class="node-modal-connections" id="nodeModalConnections"></div>
+        </div>
+    </div>
+    
+    <!-- Botón de ayuda flotante -->
+    <button class="help-btn" onclick="showHelp()" title="Ayuda">
+        <i class="fas fa-question"></i>
+    </button>
+    
+    <div class="footer">
+        <p>Mapa Conceptual exportado el ${new Date().toLocaleDateString()}</p>
+        <p>Haz clic en los nodos para ver más información</p>
+    </div>
+
+    <script>
+        // Datos del mapa - MANTENER POSICIONES ORIGINALES
+        const nodes = ${JSON.stringify(tab.nodes)};
+        const connections = ${JSON.stringify(tab.connections)};
+        
+        // Variables globales
+        let currentView = 'desktop';
+        let isMobile = false;
+        
+        // Elementos DOM
+        const exportArea = document.getElementById('exportArea');
+        const mobileNodesList = document.getElementById('mobileNodesList');
+        const desktopView = document.getElementById('desktopView');
+        const mobileView = document.getElementById('mobileView');
+        const nodeModal = document.getElementById('nodeModal');
+        
+        // Detectar si es móvil
+        function detectMobile() {
+            isMobile = window.innerWidth <= 768;
+            return isMobile;
+        }
+        
+        // Inicialización
+        function init() {
+            detectMobile();
+            
+            // Renderizar vista desktop CON POSICIONES ORIGINALES
+            renderDesktopView();
+            
+            // Renderizar vista móvil
+            renderMobileView();
+            
+            // Configurar eventos
+            setupEventListeners();
+            
+            // Ajustar vista inicial según dispositivo
+            if (isMobile) {
+                switchView('mobile');
+            } else {
+                switchView('desktop');
+            }
+            
+            // Ajustar zoom inicial para que el área de exportación sea visible
+            adjustInitialZoom();
+        }
+        
+        // Renderizar vista desktop CON POSICIONES ABSOLUTAS FIJAS
+        function renderDesktopView() {
+            exportArea.innerHTML = '';
+            
+            // Crear nodos CON TAMAÑOS Y POSICIONES ORIGINALES
+            nodes.forEach(node => {
+                const nodeElement = document.createElement('div');
+                nodeElement.className = 'node';
+                if (node.hyperlink && node.hyperlink.trim() !== '') {
+                    nodeElement.className += ' with-link';
+                }
+                nodeElement.id = 'desktop-' + node.id;
+                
+                // POSICIONES ABSOLUTAS EN PÍXELES - NO CONVERTIR
+                nodeElement.style.left = node.x + 'px';
+                nodeElement.style.top = node.y + 'px';
+                
+                // PROPIEDADES ORIGINALES - NO ESCALAR
+                nodeElement.style.background = node.color || '#ffffff';
+                nodeElement.style.color = node.textColor || 'black';
+                nodeElement.style.fontSize = (node.fontSize || 14) + 'px';
+                nodeElement.style.minWidth = '100px';
+                nodeElement.style.maxWidth = '150px';
+                
+                let innerHTML = '<div class="node-title">' + escapeHTML(node.title) + '</div>';
+                if (node.subtitle) {
+                    innerHTML += '<div class="node-subtitle">' + escapeHTML(node.subtitle) + '</div>';
+                }
+                if (node.image) {
+                    innerHTML += '<img src="' + node.image + '" class="node-image" alt="' + escapeHTML(node.title) + '">';
+                }
+                
+                nodeElement.innerHTML = innerHTML;
+                
+                // Añadir evento de clic con soporte para hipervínculos
+                nodeElement.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    if (node.hyperlink && node.hyperlink.trim() !== '' && !e.ctrlKey && !e.metaKey) {
+                        // Si tiene hipervínculo y no se presiona Ctrl/Cmd, mostrar modal
+                        showNodeModal(node);
+                    } else if (node.hyperlink && node.hyperlink.trim() !== '' && (e.ctrlKey || e.metaKey)) {
+                        // Si tiene hipervínculo y se presiona Ctrl/Cmd, abrir enlace
+                        window.open(node.hyperlink, '_blank');
+                    } else {
+                        // Si no tiene hipervínculo, mostrar modal normal
+                        showNodeModal(node);
+                    }
+                });
+                
+                exportArea.appendChild(nodeElement);
+            });
+            
+            // Crear conexiones CON POSICIONES ORIGINALES
+            connections.forEach(conn => {
+                const fromNode = nodes.find(n => n.id === conn.from);
+                const toNode = nodes.find(n => n.id === conn.to);
+                
+                if (fromNode && toNode) {
+                    const fromElement = document.getElementById('desktop-' + fromNode.id);
+                    const toElement = document.getElementById('desktop-' + toNode.id);
+                    
+                    if (fromElement && toElement) {
+                        const fromRect = fromElement.getBoundingClientRect();
+                        const toRect = toElement.getBoundingClientRect();
+                        
+                        // Calcular posiciones relativas al exportArea
+                        const fromX = fromNode.x + fromElement.offsetWidth / 2;
+                        const fromY = fromNode.y + fromElement.offsetHeight / 2;
+                        const toX = toNode.x + toElement.offsetWidth / 2;
+                        const toY = toNode.y + toElement.offsetHeight / 2;
+                        
+                        const dx = toX - fromX;
+                        const dy = toY - fromY;
+                        const length = Math.sqrt(dx * dx + dy * dy);
+                        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                        
+                        const line = document.createElement('div');
+                        line.className = 'connection';
+                        line.style.width = length + 'px';
+                        line.style.left = fromX + 'px';
+                        line.style.top = fromY + 'px';
+                        line.style.transform = 'rotate(' + angle + 'deg)';
+                        
+                        const arrow = document.createElement('div');
+                        arrow.className = 'connection-arrow';
+                        arrow.style.left = toX + 'px';
+                        arrow.style.top = toY + 'px';
+                        arrow.style.transform = 'rotate(' + angle + 'deg)';
+                        
+                        exportArea.appendChild(line);
+                        exportArea.appendChild(arrow);
+                    }
+                }
+            });
+        }
+        
+        // Renderizar vista móvil
+        function renderMobileView() {
+            mobileNodesList.innerHTML = '';
+            
+            nodes.forEach(node => {
+                const nodeConnections = connections.filter(conn => 
+                    conn.from === node.id || conn.to === node.id
+                );
+                
+                const connectedNodes = nodeConnections.map(conn => {
+                    const otherId = conn.from === node.id ? conn.to : conn.from;
+                    const otherNode = nodes.find(n => n.id === otherId);
+                    return otherNode ? otherNode.title : '';
+                }).filter(title => title !== '');
+                
+                const nodeElement = document.createElement('div');
+                nodeElement.className = 'mobile-node';
+                if (node.hyperlink && node.hyperlink.trim() !== '') {
+                    nodeElement.className += ' with-link';
+                }
+                
+                let innerHTML = \`
+                    <div class="mobile-node-title">\${escapeHTML(node.title)}</div>
+                    \${node.subtitle ? '<div class="mobile-node-subtitle">' + escapeHTML(node.subtitle) + '</div>' : ''}
+                \`;
+                
+                if (node.hyperlink && node.hyperlink.trim() !== '') {
+                    innerHTML += \`
+                        <div class="mobile-node-hyperlink">
+                            <i class="fas fa-link"></i> 
+                            <a href="\${node.hyperlink}" target="_blank">\${node.hyperlink}</a>
+                        </div>
+                    \`;
+                }
+                
+                if (connectedNodes.length > 0) {
+                    innerHTML += \`
+                        <div class="mobile-node-connections">
+                            <i class="fas fa-link"></i>
+                            Conectado con: \${connectedNodes.join(', ')}
+                        </div>
+                    \`;
+                }
+                
+                nodeElement.innerHTML = innerHTML;
+                
+                nodeElement.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showNodeModal(node);
+                });
+                
+                mobileNodesList.appendChild(nodeElement);
+            });
+        }
+        
+        // Mostrar modal del nodo
+        function showNodeModal(node) {
+            document.getElementById('nodeModalTitle').textContent = node.title;
+            document.getElementById('nodeModalSubtitle').textContent = node.subtitle || '';
+            document.getElementById('nodeModalDescription').textContent = node.description || 'Sin descripción disponible';
+            
+            const imageElement = document.getElementById('nodeModalImage');
+            if (node.image) {
+                imageElement.src = node.image;
+                imageElement.style.display = 'block';
+                imageElement.alt = node.title;
+            } else {
+                imageElement.style.display = 'none';
+            }
+            
+            const hyperlinkElement = document.getElementById('nodeModalHyperlink');
+            if (node.hyperlink && node.hyperlink.trim() !== '') {
+                hyperlinkElement.innerHTML = \`
+                    <div style="color: #3498db; font-size: 14px; margin-top: 10px;">
+                        <i class="fas fa-link"></i> 
+                        <a href="\${node.hyperlink}" target="_blank" style="color: #3498db; text-decoration: none;">
+                            \${node.hyperlink}
+                        </a>
+                        <br>
+                        <small style="color: #999;">(Ctrl+Click para abrir directamente)</small>
+                    </div>
+                \`;
+            } else {
+                hyperlinkElement.innerHTML = '';
+            }
+            
+            const nodeConnections = connections.filter(conn => 
+                conn.from === node.id || conn.to === node.id
+            );
+            
+            const connectionsElement = document.getElementById('nodeModalConnections');
+            if (nodeConnections.length > 0) {
+                const connectedNodes = nodeConnections.map(conn => {
+                    const otherId = conn.from === node.id ? conn.to : conn.from;
+                    const otherNode = nodes.find(n => n.id === otherId);
+                    return otherNode ? otherNode.title : '';
+                }).filter(title => title !== '');
+                
+                connectionsElement.innerHTML = \`
+                    <div style="color: #8e44ad; font-size: 14px; margin-top: 10px;">
+                        <i class="fas fa-link"></i> Conectado con: \${connectedNodes.join(', ')}
+                    </div>
+                \`;
+            } else {
+                connectionsElement.innerHTML = '<div style="color: #666; font-size: 14px; margin-top: 10px;">Sin conexiones</div>';
+            }
+            
+            nodeModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Cerrar modal del nodo
+        function closeNodeModal() {
+            nodeModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Cambiar entre vistas
+        function switchView(view) {
+            currentView = view;
+            
+            if (view === 'desktop') {
+                desktopView.style.display = 'flex';
+                mobileView.style.display = 'none';
+            } else {
+                desktopView.style.display = 'none';
+                mobileView.style.display = 'block';
+            }
+        }
+        
+        // Ajustar zoom inicial para que el área de exportación sea visible
+        function adjustInitialZoom() {
+            if (!isMobile) return;
+            
+            // En móvil, hacer zoom para que el exportArea sea visible
+            const container = document.querySelector('.main-container');
+            const exportArea = document.getElementById('exportArea');
+            
+            if (container && exportArea) {
+                const containerWidth = container.clientWidth;
+                const containerHeight = container.clientHeight;
+                const exportWidth = ${width};
+                const exportHeight = ${height};
+                
+                // Calcular escala para que quepa
+                const scaleX = containerWidth / exportWidth;
+                const scaleY = containerHeight / exportHeight;
+                const scale = Math.min(scaleX, scaleY) * 0.9; // 90% para margen
+                
+                exportArea.style.transform = 'scale(' + scale + ')';
+            }
+        }
+        
+        // Configurar eventos
+        function setupEventListeners() {
+            // Cerrar modal al hacer clic fuera
+            nodeModal.addEventListener('click', function(e) {
+                if (e.target === nodeModal) {
+                    closeNodeModal();
+                }
+            });
+            
+            // Cerrar modal con Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeNodeModal();
+                }
+            });
+            
+            // Detectar cambio de tamaño de ventana
+            window.addEventListener('resize', function() {
+                detectMobile();
+                if (isMobile && currentView === 'desktop') {
+                    switchView('mobile');
+                } else if (!isMobile && currentView === 'mobile') {
+                    switchView('desktop');
+                }
+                adjustInitialZoom();
+            });
+        }
+        
+        // Función de ayuda
+        function showHelp() {
+            alert('AYUDA:\\n\\n' +
+                  '📱 En móviles: Usa la vista lista de nodos\\n' +
+                  '💻 En desktop: Ve el mapa completo\\n' +
+                  '👆 Nodos: Haz clic para ver detalles\\n' +
+                  '🔗 Nodos con enlace: Ctrl+Click para abrir directamente\\n' +
+                  '📏 Área blanca: Lo que se exporta\\n' +
+                  '🎨 Fondo gris: Área de trabajo');
+        }
+        
+        // Utilidad para escapar HTML
+        function escapeHTML(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', init);
+    <\/script>
+</body>
+</html>`;
+        }
+
+        function downloadHTML() {
+            const tab = getCurrentTab();
+            if (!tab) return;
+            
+            const exportCode = generateExportCode(tab);
+            const blob = new Blob([exportCode], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${tab.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'mapa'}-conceptual.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            closeSaveModal();
+            
+            tab.unsavedChanges = false;
+            tab.updateTabUI();
+            showModeIndicator('Mapa exportado como HTML', '#27ae60');
+        }
+
+        function saveAllMaps() {
+            tabs.forEach((tab, index) => {
+                setTimeout(() => {
+                    const exportCode = generateExportCode(tab);
+                    const blob = new Blob([exportCode], { type: 'text/html' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${tab.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || `mapa_${index + 1}`}-conceptual.html`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    tab.unsavedChanges = false;
+                    tab.updateTabUI();
+                }, index * 300);
+            });
+            
+            closeSaveModal();
+            showModeIndicator(`Guardando ${tabs.length} archivos...`, '#3498db');
+        }
+
+        function openInNewTab() {
+            const tab = getCurrentTab();
+            if (!tab) return;
+            
+            const exportCode = generateExportCode(tab);
+            const blob = new Blob([exportCode], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+            
+            setTimeout(() => {
+                URL.revokeObjectURL(url);
+            }, 1000);
+            
+            showModeIndicator('Abriendo en nueva pestaña...', '#3498db');
+        }
+
+        // =============================================
+        // FUNCIONES DE ARCHIVOS
+        // =============================================
+
+        function loadFileIntoTab(file) {
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    
+                    const nodesMatch = content.match(/const nodes = (\[.*?\]);/s);
+                    const connectionsMatch = content.match(/const connections = (\[.*?\]);/s);
+                    
+                    if (nodesMatch && connectionsMatch) {
+                        const newNodes = JSON.parse(nodesMatch[1]);
+                        const newConnections = JSON.parse(connectionsMatch[1]);
+                        
+                        // Crear nueva pestaña con el nombre del archivo
+                        const fileName = file.name.replace('.html', '');
+                        const newTab = createNewTab(fileName);
+                        
+                        newTab.nodes = newNodes;
+                        newTab.connections = newConnections;
+                        
+                        // Actualizar nodeCounter
+                        let maxId = 0;
+                        newTab.nodes.forEach(node => {
+                            const match = node.id.match(/node-(\d+)/);
+                            if (match) {
+                                const idNum = parseInt(match[1]);
+                                if (idNum > maxId) maxId = idNum;
+                            }
+                        });
+                        newTab.nodeCounter = maxId;
+                        
+                        newTab.fileName = file.name;
+                        newTab.unsavedChanges = false;
+                        newTab.updateTabUI();
+                        
+                        renderAll(newTab.nodes, newTab.connections);
+                        updateCounters();
+                        deselectAll();
+                        
+                        showModeIndicator('Archivo cargado en nueva pestaña', '#27ae60');
+                    } else {
+                        alert('Archivo no válido');
+                    }
+                } catch (error) {
+                    alert('Error al cargar: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // =============================================
+        // FUNCIONES DE UTILIDAD
+        // =============================================
+
+        function updateCounters() {
+            const tab = getCurrentTab();
+            if (!tab) {
+                document.getElementById('nodesCount').textContent = '0';
+                document.getElementById('connectionsCount').textContent = '0';
+                return;
+            }
+            document.getElementById('nodesCount').textContent = tab.nodes.length;
+            document.getElementById('connectionsCount').textContent = tab.connections.length;
+        }
+
+        function updateSelectionInfo() {
+            const info = document.getElementById('selectionInfo');
+            if (selectedNodeId) {
+                const node = getSelectedNode();
+                info.textContent = `Seleccionado: ${node ? node.title : 'Nodo'}`;
+                info.style.color = '#8e44ad';
+            } else if (selectedConnection) {
+                info.textContent = 'Conexión seleccionada';
+                info.style.color = '#e74c3c';
+            } else {
+                info.textContent = 'Sin selección';
+                info.style.color = '#999';
+            }
+        }
+
+        function clearCurrentMap() {
+            const tab = getCurrentTab();
+            if (!tab) return;
+            
+            if (!confirm('¿Eliminar todo el mapa actual? Esta acción no se puede deshacer.')) return;
+            
+            tab.saveState();
+            tab.nodes = [];
+            tab.connections = [];
+            tab.nodeCounter = 0;
+            selectedNodeId = null;
+            selectedConnection = null;
+            
+            renderAll(tab.nodes, tab.connections);
+            updateCounters();
+            updateSelectionInfo();
+            
+            showModeIndicator('Mapa limpiado', '#e74c3c');
+        }
+
+        function deselectAll() {
+            if (selectedNodeId) {
+                const nodeElement = document.getElementById(selectedNodeId);
+                if (nodeElement) nodeElement.classList.remove('selected');
+                selectedNodeId = null;
+            }
+            
+            if (selectedConnection) {
+                const line = document.getElementById('conn-' + selectedConnection.from + '-' + selectedConnection.to);
+                const arrow = document.getElementById('arrow-' + selectedConnection.from + '-' + selectedConnection.to);
+                if (line) line.classList.remove('selected');
+                if (arrow) arrow.classList.remove('selected');
+                selectedConnection = null;
+            }
+            
+            setConnectionMode(false);
+            setDisconnectMode(false);
+            updateSelectionInfo();
+            showModeIndicator('Deseleccionado todo', '#27ae60');
+        }
+
+        function showModeIndicator(text, color = '#8e44ad') {
+            modeIndicator.textContent = text;
+            modeIndicator.style.background = color;
+            modeIndicator.style.display = 'block';
+            setTimeout(() => {
+                if (!connectionMode && !disconnectMode) {
+                    modeIndicator.style.display = 'none';
+                }
+            }, 3000);
+        }
+
+        function renderAll(nodes = [], connections = []) {
+            workspace.innerHTML = '';
+            nodes.forEach(node => renderNode(node));
+            connections.forEach(conn => renderConnection(conn.from, conn.to));
+            updateWorkspaceTransform();
+            
+            if (disconnectMode) {
+                setDisconnectMode(true);
+            }
+        }
+
+        // =============================================
+        // MODALES
+        // =============================================
+
+        function showSaveModal() {
+            document.getElementById('saveModal').style.display = 'block';
+        }
+
+        function closeSaveModal() {
+            document.getElementById('saveModal').style.display = 'none';
+        }
+
+        // Cerrar modales al hacer clic fuera
+        window.addEventListener('click', function(event) {
+            const modals = ['nodeModal', 'descriptionModal', 'saveModal', 'backgroundModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    if (modalId === 'nodeModal') closeNodeModal();
+                    else if (modalId === 'descriptionModal') closeModal();
+                    else if (modalId === 'saveModal') closeSaveModal();
+                    else if (modalId === 'backgroundModal') closeBackgroundModal();
+                }
+            });
+        });
+
+        // =============================================
+        // INICIALIZACIÓN
+        // =============================================
+
+        function init() {
+            setupZoomPan();
+            
+            // Inicializar sistema de colores
+            initColorSystem();
+            
+            // Crear pestaña inicial
+            createNewTab("Mapa Principal");
+            
+            // Configurar botón de nueva pestaña
+            document.querySelector('.add-tab-btn').addEventListener('click', () => {
+                createNewTab();
+            });
+            
+            showModeIndicator('¡Bienvenido al Mapa Conceptual v8!', '#8e44ad');
+        }
+
+        // Iniciar aplicación
+        init();
+    </script>
+</body>
+</html>
